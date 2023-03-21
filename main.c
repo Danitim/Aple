@@ -97,9 +97,7 @@ int main(int argc, const char *argv[]) {
 static int decode_packet(uint *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame)
 {
   int response = avcodec_send_packet(pCodecContext, pPacket);
-
   if (response < 0) { return response;}
-
   while (response >= 0)
   {
     response = avcodec_receive_frame(pCodecContext, pFrame);
@@ -108,7 +106,7 @@ static int decode_packet(uint *bitmap, AVPacket *pPacket, AVCodecContext *pCodec
     } else if (response < 0) { return response;}
 
     if (response >= 0) {
-      compress_frame(bitmap, pFrame->data[0], pFrame->linesize[0], pFrame->width, pFrame->height);
+        compress_frame(bitmap, pFrame->data[0], pFrame->linesize[0], pFrame->width, pFrame->height);
     }
   }
   return 0;
