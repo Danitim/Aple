@@ -16,6 +16,7 @@ void compress_frame(uint *bitmap, uchar *img, int wrap, int xsize, int ysize) {
             x=0; y++;
             if (y>=64) break;
         }
+
         
         float gx = x/128.0*(xsize-1);
         float gy = y/64.0*(ysize-1);
@@ -33,6 +34,8 @@ void compress_frame(uint *bitmap, uchar *img, int wrap, int xsize, int ysize) {
         
         if (res>=128)
             bitmap[(128*y+x)/32] |= 1UL << (31-x%32);
+        else
+            bitmap[(128*y+x)/32] &= ~(1UL << (31-x%32));
 
     }
 }

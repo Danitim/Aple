@@ -7,6 +7,7 @@
 #include <inttypes.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #include "cmprss.h"
 #include "timecalc.h"
@@ -15,6 +16,7 @@
 uint OFC, OFPS;
 uint FC, FPS = 15;
 uint TPF;
+ush X = 128, Y = 64;
 
 static int decode_packet(uint *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame);
 static void print_bitmap(uint *bitmap);
@@ -57,11 +59,16 @@ int main(int argc, const char *argv[]) {
     AVFrame *pFrame = av_frame_alloc();
     if (!pFrame) { return -1;}
     AVPacket *pPacket = av_packet_alloc();
-    if (!pPacket) { return -1; }
+    if (!pPacket) { return -1;}
 
     int response = 0;
     int how_many_packets_to_process = 2;
     TPF = NANO/OFPS;
+
+    struct winsize w;
+    ioctl(0, TIOCGWINSZ, &w);
+    X = w.ws_col; Y = w.ws_row;
+    if (X<128 || Y<64) { printf("Current console size is too small to show the video\n(X: %hu/128, Y: %hu/64)\n", X, Y); return -1;}
 
     uint bitmap[256] = {0};
     struct timespec last, cur;
@@ -113,12 +120,16 @@ static int decode_packet(uint *bitmap, AVPacket *pPacket, AVCodecContext *pCodec
 }
 
 static void print_bitmap(uint *bitmap) {
-    for (int x=0; x<256; x++) {
-          for (int y=0; y<32; y++) {
-              printf(bitmap[x] & (1 << (31 - y)) ? "@" : ".");
-          }
-          bitmap[x] = 0;
-          if (x%4==3) printf("\n");
-      }
-    printf("\n\n\n");
+    char *buf = (char*) calloc(X*Y, sizeof(char*));
+
+    for (int y=0; y<Y; y++) {
+        for (int x=0; x<X; x++) {
+            buf[y*X+x] = (y<64 && x<128) ? (bitmap[4*y+x/32] & (1 << (31 - x%32)) ? '@' : '.') : '.';
+        }
+    }
+
+    fwrite(buf, sizeof(char), X*Y, stdout);
+    //printf("\n(X: %hu, Y: %hu) Apparently, this is the end of the frame, but it's still unreadable\n", X, Y);
+
+    free(buf);
 }

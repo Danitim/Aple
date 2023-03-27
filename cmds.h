@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef unsigned short ush;
 typedef unsigned int uint;
 
 uint get_frame_count(const char *file_name);
