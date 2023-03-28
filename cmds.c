@@ -10,7 +10,7 @@ uint get_frame_count(const char *file_name) {
     if (f == NULL) {pclose(f); return 0;}
 
     uint count = 0;
-    fscanf(f, "%u", &count);
+    if (fscanf(f, "%u", &count) != 1) {pclose(f); return 0;}
 
     pclose(f);
     return count;
@@ -26,7 +26,7 @@ uint get_frame_rate(const char *file_name) {
     if (f == NULL) {pclose(f); return 0;}
 
     uint rate = 0;
-    fscanf(f, "%u", &rate);
+    if (fscanf(f, "%u", &rate) != 1) {pclose(f); return 0;}
 
     pclose(f);
     return rate;
