@@ -118,7 +118,7 @@ ush offset = 7;
 
 static void print_bitmap(uint *bitmap) {
     //int n = sprintf(buf+7, "FRAME: %d", frame);
-    strcpy(buf, "\x1B[25?l");
+    strcpy(buf, "\x1B[?25h");
     strcpy(buf+1, "\033[1;1H");
     for (int y=0; y<Y; y++) {
         for (int x=0; x<X; x++) {
