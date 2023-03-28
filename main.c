@@ -14,9 +14,11 @@
 #include "cmds.h"
 
 uint OFC, OFPS;
-uint FC, FPS = 15;
+uint FC, FPS = 60;
 uint TPF;
 ush X = 128, Y = 64;
+
+char *buf;
 
 static int decode_packet(uint *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame);
 static void print_bitmap(uint *bitmap);
@@ -30,6 +32,7 @@ int main(int argc, const char *argv[]) {
     AVCodec *pCodec = NULL;
     AVCodecParameters *pCodecParameters =  NULL;
     int video_stream_index = -1;
+    buf = malloc(1024*1024);
       
     OFC = get_frame_count(argv[1]);
     OFPS = get_frame_rate(argv[1]);
@@ -62,7 +65,6 @@ int main(int argc, const char *argv[]) {
     if (!pPacket) { return -1;}
 
     int response = 0;
-    int how_many_packets_to_process = 2;
     TPF = NANO/OFPS;
 
     struct winsize w;
@@ -74,23 +76,20 @@ int main(int argc, const char *argv[]) {
     struct timespec last, cur;
     clock_gettime(CLOCK_MONOTONIC_RAW, &last);
 
-    //printf("Current frame rate: %u\n", OFPS);
+
     while (1) {
         clock_gettime(CLOCK_MONOTONIC_RAW, &cur);
-        //printf("Time delta: %u/%u\n", time_delta_ns(last, cur), TPF);
         if (time_delta_ns(last, cur) >= TPF) {
-            if (av_read_frame(pFormatContext, pPacket) >= 0) {
-                if (pPacket->stream_index == video_stream_index) {
-                    response = decode_packet(bitmap, pPacket, pCodecContext, pFrame);
-                    if (response < 0) break;
-                    //if (--how_many_packets_to_process <= 0) break;
-                }
-                av_packet_unref(pPacket);
-                print_bitmap(bitmap);
-                last = cur;
-            }
+            while(av_read_frame(pFormatContext, pPacket) >= 0)
+                if (pPacket->stream_index == video_stream_index) break;
+
+            response = decode_packet(bitmap, pPacket, pCodecContext, pFrame);
+            if (response < 0) break;
+
+            print_bitmap(bitmap);
+            last = cur;
+            av_packet_unref(pPacket);
         }
-        sleep(0.002);
     }
 
 
@@ -98,6 +97,7 @@ int main(int argc, const char *argv[]) {
     av_packet_free(&pPacket);
     av_frame_free(&pFrame);
     avcodec_free_context(&pCodecContext);
+    free(buf);
     return 0;
 }
 
@@ -119,17 +119,17 @@ static int decode_packet(uint *bitmap, AVPacket *pPacket, AVCodecContext *pCodec
   return 0;
 }
 
-static void print_bitmap(uint *bitmap) {
-    char *buf = (char*) calloc(X*Y, sizeof(char*));
+uint offset = 7;
 
+static void print_bitmap(uint *bitmap) {
+    //int n = sprintf(buf+7, "FRAME: %d", frame);
+    strcpy(buf, "\033[1;1H");
     for (int y=0; y<Y; y++) {
         for (int x=0; x<X; x++) {
-            buf[y*X+x] = (y<64 && x<128) ? (bitmap[4*y+x/32] & (1 << (31 - x%32)) ? '@' : '.') : '.';
+            if (y*X+x >= 0)
+                buf[y*X+x+offset] = (y<64 && x<128) ? (bitmap[(128*y+x)/32] & (1 << (31 - (x)%32)) ? '@' : '.') : ' ';
         }
     }
-
     fwrite(buf, sizeof(char), X*Y, stdout);
-    //printf("\n(X: %hu, Y: %hu) Apparently, this is the end of the frame, but it's still unreadable\n", X, Y);
-
-    free(buf);
+    fsync(1);
 }
