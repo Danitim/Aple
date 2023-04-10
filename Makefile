@@ -1,4 +1,4 @@
-CFLAGS = -O3
+CFLAGS = -O3 -g
 SOURCES = cmds.c cmprss.c timecalc.c
 DEPS = -lavformat -lavcodec -lavutil -lswscale 
 
