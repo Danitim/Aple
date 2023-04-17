@@ -14,6 +14,7 @@
 
 <h1>Simply usefull commands</h1>
 <ul style="font-size: 30px">
+    <li>Set tty ready for work:   <code>stty -F /dev/ttyACM0 raw 115200</code></li>
     <li>Give serial port R/W rights:   <code>chmod g+rw ttyACM0</code></li>
     <li>Establish direct connection to the serial port:   <code>cu -l /dev/ttyACM0 -s 115200</code></li>
     <li>Check current state of the serial port:   <code>ls -l /dev/ttyACM0</code></li>
