@@ -9,9 +9,9 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-#include "cmprss.h"
-#include "timecalc.h"
-#include "cmds.h"
+#include "deps/cmprss.h"
+#include "deps/timecalc.h"
+#include "deps/cmds.h"
 
 uint FC, FPS = 60;
 uint TPF;
