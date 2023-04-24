@@ -8,7 +8,7 @@ float blerp(float p00, float p01, float p10, float p11, float tx, float ty) {
     return lerp(lerp(p00, p10, tx), lerp(p01, p11, tx), ty);
 }
 
-void compress_frame(uint *bitmap, uchar *img, int wrap, int xsize, int ysize) {
+void compress_frame(char *bitmap, uchar *img, int wrap, int xsize, int ysize) {
     int x, y;
 
     for (x=0, y=0; y<64; x++) {
@@ -33,9 +33,9 @@ void compress_frame(uint *bitmap, uchar *img, int wrap, int xsize, int ysize) {
             res |= (uint8_t)blerp(getbyte(p00, i), getbyte(p01, i), getbyte(p10, i), getbyte(p11, i), gy-gyi, gx-gxi) << (8*i);
         
         if (res>=128)
-            bitmap[(128*y+x)/32] |= 1UL << (31-x%32);
+            bitmap[(128*y+x)/8] |= 1UL << (7-x%8);
         else
-            bitmap[(128*y+x)/32] &= ~(1UL << (31-x%32));
+            bitmap[(128*y+x)/8] &= ~(1UL << (7-x%8));
 
     }
 }

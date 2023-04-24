@@ -8,15 +8,14 @@
 
 
 int main() {
-    int serial_port = open("/dev/ttyACM0", O_RDWR);
+    FILE* serial_port = fopen("/dev/ttyACM0", "w+");
+
 
     struct termios tty;
-
-    if(tcgetattr(serial_port, &tty) != 0) {
+    if(tcgetattr(fileno(serial_port), &tty) != 0) {
       printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
       return 1;
     }
-
     tty.c_cflag &= ~PARENB; // Clear parity bit, disabling parity (most common)
     tty.c_cflag &= ~CSTOPB; // Clear stop field, only one stop bit used in communication (most common)
     tty.c_cflag &= ~CSIZE; // Clear all bits that set the data size
@@ -36,36 +35,40 @@ int main() {
     tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
 
     tty.c_cc[VTIME] = 10;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
-    tty.c_cc[VMIN] = 0;
+    tty.c_cc[VMIN] = 10;
 
-    cfsetispeed(&tty, B115200);
-    cfsetospeed(&tty, B115200);
-
-    if (tcsetattr(serial_port, TCSANOW, &tty) != 0) {
+    
+    cfsetispeed(&tty, B9600);
+    cfsetospeed(&tty, B9600);
+   
+    if (tcsetattr(fileno(serial_port), TCSANOW, &tty) != 0) {
       printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
       return 1;
     }
+  
 
-    char msg[256] = {7};
-    write(serial_port, msg, sizeof(msg));
+    char msg[128] = "Hello!\r\n";
+    char read_buf[100];
+    char* res = NULL;
+    setbuf(serial_port, NULL);
+again:
+    printf("Sending hello\n");
+    fprintf(serial_port, "qweqwe %s\n", msg);
+    fflush(serial_port);
+    printf("Done\n");
 
-    char read_buf [1024];
-    memset(&read_buf, '\0', sizeof(read_buf));
-    sleep(0.5);
+read_again:
+    printf("Reading...\n");
+    res = fgets(read_buf, sizeof(read_buf),serial_port);
 
-    int num_bytes = read(serial_port, &read_buf, sizeof(read_buf));
-
-    if (num_bytes < 0) {
+    if (res == NULL && errno) {
       printf("Error reading: %s\n", strerror(errno));
       return 1;
-    }
+    } else if (res == NULL && ! errno) goto read_again; 
 
-    printf("Read %i bytes. Received message: ", num_bytes);
+    printf("Read bytes. Received message: '%s'\n",read_buf);
 
-    for (int i=0; i<strlen(read_buf); i++)
-        printf("%d\n", read_buf[i]);
-    printf("\n");
-
-    close(serial_port);
+    goto again;
+    fclose(serial_port);
     return 0;
 }

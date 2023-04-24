@@ -14,4 +14,4 @@ float lerp(float s, float e, float t);
 
 float blerp(float p00, float p01, float p10, float p11, float tx, float ty);
 
-void compress_frame(uint* bitmap, uchar* img, int wrap, int xsize, int ysize);
+void compress_frame(char* bitmap, uchar* img, int wrap, int xsize, int ysize);
