@@ -5,6 +5,7 @@
     <li>Clone "master" branch of this Git repository</li>
     <li>Install dependent libraries: <code>libavcodec</code>, <code>libavformat</code></li>
     <li>Compile program using Makefile: <code>make</code></li>
+    <li>Run program with specified name of the video: <code>./main input.mp4</code></li>
 </ol>
 <br>
 <br>
