@@ -19,8 +19,8 @@ ush X = 128, Y = 64;
 
 char *buf;
 
-static int decode_packet(char *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame);
-static void print_bitmap(char *bitmap);
+static int decode_packet(uchar *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame);
+static void print_bitmap(uchar *bitmap);
 
 int main(int argc, const char *argv[]) {
     if (argc < 2) { printf("You need to specify a media file.\n"); return -1;}
@@ -71,7 +71,7 @@ int main(int argc, const char *argv[]) {
     X = w.ws_col; Y = w.ws_row;
     if (X<128 || Y<64) { printf("Current console size is too small to show the video\n(X: %hu/128, Y: %hu/64)\n", X, Y); return -1;}
 
-    char bitmap[1024] = {0};
+    uchar bitmap[1024] = {0};
     struct timespec last, cur;
     clock_gettime(CLOCK_MONOTONIC_RAW, &last);
 
@@ -99,7 +99,7 @@ int main(int argc, const char *argv[]) {
     return 0;
 }
 
-static int decode_packet(char *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame) {
+static int decode_packet(uchar *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame) {
     int response = avcodec_send_packet(pCodecContext, pPacket);
     if (response < 0) { return response;}
     while (response >= 0) {
@@ -117,7 +117,7 @@ static int decode_packet(char *bitmap, AVPacket *pPacket, AVCodecContext *pCodec
 ush offset = 7;
 int num = 1;
 
-static void print_bitmap(char *bitmap) {
+static void print_bitmap(uchar *bitmap) {
     //int n = sprintf(buf+7, "FRAME: %d", frame);
     strcpy(buf, "\x1B[?25h");
     strcpy(buf+1, "\033[1;1H");
@@ -126,6 +126,12 @@ static void print_bitmap(char *bitmap) {
             buf[y*X+x+offset] = (y<64 && x<128) ? (bitmap[(128*y+x)/8] & (1 << (7 - x%8)) ? '@' : '.') : ' ';
         }
     }
+    /*
+    for (int i=0; i<1024; i++) {
+        printf("%u, ", bitmap[i]);
+    }
+    printf("\n\n");
+    */
     fwrite(buf, sizeof(char), X*Y, stdout);
     fsync(1);
 }

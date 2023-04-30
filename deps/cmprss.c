@@ -8,7 +8,7 @@ float blerp(float p00, float p01, float p10, float p11, float tx, float ty) {
     return lerp(lerp(p00, p10, tx), lerp(p01, p11, tx), ty);
 }
 
-void compress_frame(char *bitmap, uchar *img, int wrap, int xsize, int ysize) {
+void compress_frame(uchar *bitmap, uchar *img, int wrap, int xsize, int ysize) {
     int x, y;
 
     for (x=0, y=0; y<64; x++) {
