@@ -1,6 +1,5 @@
 # Aple
 
-<h1>Library to attach USB device to WSL - usbipd</h1>
 <h2>Commands in PowerShell:</h2>
 <ul style="font-size: 30px">
     <li>List all available devices:   <code>usbipd wsl list</code></li>
