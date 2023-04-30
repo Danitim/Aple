@@ -1,5 +1,17 @@
 # Aple
 
+<h1>Computer part installation</h1>
+<ol style="font-size: 30px">
+    <li>Clone "master" branch of this Git repository</li>
+    <li>Install dependent libraries: <code>libavcodec</code>, <code>libavformat</code></li>
+    <li>Compile program using Makefile: <code>make</code></li>
+</ol>
+<br>
+<br>
+<br>
+<br>
+<br>
+<h1>/Dev/ Commands</h1>
 <h2>Commands in PowerShell:</h2>
 <ul style="font-size: 30px">
     <li>List all available devices:   <code>usbipd wsl list</code></li>
