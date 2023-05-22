@@ -53,7 +53,7 @@ int main() {
     setbuf(serial_port, NULL);
 again:
     printf("Sending hello\n");
-    fprintf(serial_port, "qweqwe %s\n", msg);
+    fprintf(serial_port, "%s\n", msg);
     fflush(serial_port);
     printf("Done\n");
 

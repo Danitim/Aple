@@ -23,6 +23,6 @@ void set_tty_flags(struct termios *tty) {
     tty->c_cc[VMIN] = 10;
 
 
-    cfsetispeed(tty, B9600);
-    cfsetospeed(tty, B9600);
+    cfsetispeed(tty, B115200);
+    cfsetospeed(tty, B115200);
 }

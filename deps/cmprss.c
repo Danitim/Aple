@@ -33,9 +33,9 @@ void compress_frame(uchar *bitmap, uchar *img, int wrap, int xsize, int ysize) {
             res |= (uint8_t)blerp(getbyte(p00, i), getbyte(p01, i), getbyte(p10, i), getbyte(p11, i), gy-gyi, gx-gxi) << (8*i);
         
         if (res>=128)
-            bitmap[(128*y+x)/8] |= 1UL << (7-x%8);
+            bitmap[(y/8)*128+x] |= 1UL << y%8;
         else
-            bitmap[(128*y+x)/8] &= ~(1UL << (7-x%8));
+            bitmap[(y/8)*128+x] &= ~(1UL << y%8);
 
     }
 }
