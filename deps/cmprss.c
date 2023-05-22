@@ -1,14 +1,18 @@
 #include "cmprss.h"
 
-float lerp(float s, float e, float t) {
+char ascii_grayscale[9] = {'.', ':', '-', '=', '+', '*', '#', '%', '@'};
+
+
+static float lerp(float s, float e, float t) {
     return s+(e-s)*t;
 }
 
-float blerp(float p00, float p01, float p10, float p11, float tx, float ty) {
+static float blerp(float p00, float p01, float p10, float p11, float tx, float ty) {
     return lerp(lerp(p00, p10, tx), lerp(p01, p11, tx), ty);
 }
 
-void compress_frame(uint *bitmap, uchar *img, int wrap, int xsize, int ysize) {
+
+void compress_frame(char *bitmap, uchar *img, int wrap, int xsize, int ysize) {
     int x, y;
 
     for (x=0, y=0; y<64; x++) {
@@ -31,11 +35,7 @@ void compress_frame(uint *bitmap, uchar *img, int wrap, int xsize, int ysize) {
         uint8_t i;
         for (i=0; i<3; i++)
             res |= (uint8_t)blerp(getbyte(p00, i), getbyte(p01, i), getbyte(p10, i), getbyte(p11, i), gy-gyi, gx-gxi) << (8*i);
-        
-        if (res>=128)
-            bitmap[(128*y+x)/32] |= 1UL << (31-x%32);
-        else
-            bitmap[(128*y+x)/32] &= ~(1UL << (31-x%32));
 
+        bitmap[128*y+x] = ascii_grayscale[(res*9)/256];
     }
 }

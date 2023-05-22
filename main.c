@@ -19,8 +19,8 @@ ush X = 128, Y = 64;
 
 char *buf;
 
-static int decode_packet(uint *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame);
-static void print_bitmap(uint *bitmap);
+static int decode_packet(char *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame);
+static void print_bitmap(char *bitmap);
 
 int main(int argc, const char *argv[]) {
     if (argc < 2) { printf("You need to specify a media file.\n"); return -1;}
@@ -71,11 +71,12 @@ int main(int argc, const char *argv[]) {
     X = w.ws_col; Y = w.ws_row;
     if (X<128 || Y<64) { printf("Current console size is too small to show the video\n(X: %hu/128, Y: %hu/64)\n", X, Y); return -1;}
 
-    uint bitmap[256] = {0};
+    char bitmap[8192] = {0};
     struct timespec last, cur;
     clock_gettime(CLOCK_MONOTONIC_RAW, &last);
 
 
+    printf("\e[?25l");
     while (1) {
         clock_gettime(CLOCK_MONOTONIC_RAW, &cur);
         if (time_delta_ns(last, cur) >= TPF) {
@@ -99,7 +100,7 @@ int main(int argc, const char *argv[]) {
     return 0;
 }
 
-static int decode_packet(uint *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame) {
+static int decode_packet(char *bitmap, AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame) {
     int response = avcodec_send_packet(pCodecContext, pPacket);
     if (response < 0) { return response;}
     while (response >= 0) {
@@ -114,15 +115,14 @@ static int decode_packet(uint *bitmap, AVPacket *pPacket, AVCodecContext *pCodec
     return 0;
 }
 
-ush offset = 7;
+const ush offset = 7;
 
-static void print_bitmap(uint *bitmap) {
-    //int n = sprintf(buf+7, "FRAME: %d", frame);
+static void print_bitmap(char *bitmap) {
     strcpy(buf, "\x1B[?25h");
     strcpy(buf+1, "\033[1;1H");
     for (int y=0; y<Y; y++) {
         for (int x=0; x<X; x++) {
-            buf[y*X+x+offset] = (y<64 && x<128) ? (bitmap[(128*y+x)/32] & (1 << (31 - (x)%32)) ? '@' : '.') : ' ';
+            buf[y*X+x+offset] = (y<64 && x<128) ? (bitmap[y*128+x]) : ' ';
         }
     }
     fwrite(buf, sizeof(char), X*Y, stdout);
