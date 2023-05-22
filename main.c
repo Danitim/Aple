@@ -128,11 +128,11 @@ const int freq = 60;
 int now = 0;
 
 static void send_bitmap(FILE* serial_port, uchar *bitmap) {
-    if (now%freq==0) {
+    //if (now%freq==0) {
         for (int num = 0; num<16; num++) {
             sleep(0.1);
             setbuf(serial_port, NULL);
-            strncpy(msg, bitmap+64*num, 64);
+            strncpy(msg, bitmap+num*64, 64);
             
             for (int i=0; i<64; i++)
                 printf("%u", msg[i]);
@@ -141,7 +141,7 @@ static void send_bitmap(FILE* serial_port, uchar *bitmap) {
             fprintf(serial_port, "%s\r\n", (char*)msg);
             fflush(serial_port);
         }
-    } else now++;
+    //} else now++;
 }
 
 
