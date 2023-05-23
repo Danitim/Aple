@@ -15,7 +15,7 @@
 
 uint FC, FPS = 60;
 uint TPF;
-ush X = 128, Y = 64;
+ush X=128, Y=64;
 
 char *buf;
 
@@ -67,11 +67,11 @@ int main(int argc, const char *argv[]) {
     TPF = NANO/FPS;
 
     struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     X = w.ws_col; Y = w.ws_row;
-    if (X<128 || Y<64) { printf("Current console size is too small to show the video\n(X: %hu/128, Y: %hu/64)\n", X, Y); return -1;}
+    X_SIZE = X; Y_SIZE = Y;
 
-    char bitmap[8192] = {0};
+    char* bitmap = (char*) calloc(X_SIZE*Y_SIZE, sizeof(char));
     struct timespec last, cur;
     clock_gettime(CLOCK_MONOTONIC_RAW, &last);
 
@@ -122,9 +122,9 @@ static void print_bitmap(char *bitmap) {
     strcpy(buf+1, "\033[1;1H");
     for (int y=0; y<Y; y++) {
         for (int x=0; x<X; x++) {
-            buf[y*X+x+offset] = (y<64 && x<128) ? (bitmap[y*128+x]) : ' ';
+            buf[y*X+x+offset] = bitmap[X_SIZE*y+x];
         }
     }
-    fwrite(buf, sizeof(char), X*Y, stdout);
+    fwrite(buf, sizeof(char), X*Y+offset, stdout);
     fsync(1);
 }
